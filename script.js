@@ -1,91 +1,68 @@
 (function () {
-  // Mobile menu
-  const toggle = document.querySelector(".menu-toggle");
-  const nav = document.querySelector(".nav");
+  var toggle = document.querySelector(".menu-toggle");
+  var nav = document.querySelector(".nav");
   if (toggle && nav) {
-    toggle.addEventListener("click", () => {
-      const open = nav.classList.toggle("open");
+    toggle.addEventListener("click", function () {
+      var open = nav.classList.toggle("open");
       toggle.setAttribute("aria-expanded", open ? "true" : "false");
     });
-    nav.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
+    nav.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () {
         nav.classList.remove("open");
         toggle.setAttribute("aria-expanded", "false");
       });
     });
   }
 
-  // Checklist persistence
-  const STORAGE_KEY = "ard-protection-checklist-v2";
-
+  var KEY = "ard-protection-checklist-v3";
   function loadChecks() {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      document.querySelectorAll('.checklist input[type="checkbox"]').forEach((cb, i) => {
+      var saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+      document.querySelectorAll('.checklist input[type="checkbox"]').forEach(function (cb, i) {
         if (saved[i]) cb.checked = true;
       });
-    } catch (_) {}
+    } catch (e) {}
   }
-
   function saveChecks() {
-    const state = {};
-    document.querySelectorAll('.checklist input[type="checkbox"]').forEach((cb, i) => {
+    var state = {};
+    document.querySelectorAll('.checklist input[type="checkbox"]').forEach(function (cb, i) {
       state[i] = cb.checked;
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(KEY, JSON.stringify(state));
   }
-
-  document.querySelectorAll('.checklist input[type="checkbox"]').forEach((cb) => {
+  document.querySelectorAll('.checklist input[type="checkbox"]').forEach(function (cb) {
     cb.addEventListener("change", saveChecks);
   });
-
   loadChecks();
 
-  const clearBtn = document.getElementById("clear-checklist");
+  var clearBtn = document.getElementById("clear-checklist");
   if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      document.querySelectorAll('.checklist input[type="checkbox"]').forEach((cb) => {
+    clearBtn.addEventListener("click", function () {
+      document.querySelectorAll('.checklist input[type="checkbox"]').forEach(function (cb) {
         cb.checked = false;
       });
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(KEY);
     });
   }
-
-  const printBtn = document.getElementById("print-checklist");
+  var printBtn = document.getElementById("print-checklist");
   if (printBtn) {
-    printBtn.addEventListener("click", () => window.print());
+    printBtn.addEventListener("click", function () { window.print(); });
   }
 
-  // Copy template buttons
-  document.querySelectorAll(".btn-copy").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-target");
-      const el = document.getElementById(id);
+  document.querySelectorAll(".btn-copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var id = btn.getAttribute("data-target");
+      var el = document.getElementById(id);
       if (!el) return;
-      const text = el.textContent.trim();
-      try {
-        await navigator.clipboard.writeText(text);
-        const original = btn.textContent;
-        btn.textContent = "Copied!";
-        setTimeout(() => {
-          btn.textContent = original;
-        }, 1600);
-      } catch (_) {
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        try {
-          document.execCommand("copy");
+      var text = el.textContent.trim();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          var o = btn.textContent;
           btn.textContent = "Copied!";
-          setTimeout(() => {
-            btn.textContent = "Copy text";
-          }, 1600);
-        } catch (e) {
-          btn.textContent = "Select & copy manually";
-        }
-        sel.removeAllRanges();
+          setTimeout(function () { btn.textContent = o; }, 1600);
+        });
+      } else {
+        btn.textContent = "Select & copy manually";
       }
     });
   });
